@@ -1,0 +1,74 @@
+{
+  "displayedAttributes": ["*"],
+  "searchableAttributes": [
+    "name",
+    "nameWithOwner",
+    "description",
+    "topics",
+    "primaryLanguage",
+    "lang1_name",
+    "lang2_name",
+    "license_name",
+    "owner_login"
+  ],
+  "filterableAttributes": [
+    "primaryLanguage",
+    "stargazerCount",
+    "pushedAt",
+    "createdAt",
+    "isArchived",
+    "isFork",
+    "hasIssuesEnabled",
+    "license_spdxId",
+    "owner_type",
+    "lang1_name",
+    "lang2_name",
+    "topics",
+    "is_active"
+  ],
+  "sortableAttributes": [
+    "stargazerCount",
+    "pushedAt",
+    "createdAt",
+    "forkCount",
+    "issuesCount",
+    "pullRequestsCount",
+    "custom_rank"
+  ],
+  "rankingRules": [
+    "words",
+    "typo",
+    "proximity",
+    "attribute",
+    "sort",
+    "exactness",
+    "custom_rank:desc"
+  ],
+  "stopWords": [
+    "the",
+    "a",
+    "an"
+  ],
+  "synonyms": {
+    "backend": ["server", "api", "microservice", "rest", "graphql", "backend"],
+    "frontend": ["ui", "interface", "client", "web app", "dashboard", "frontend"],
+    "security": ["auth", "authentication", "encryption", "vulnerability", "secure", "security"],
+    "ml": ["machine learning", "deep learning", "neural network", "tensorflow", "pytorch", "ml"],
+    "ai": ["artificial intelligence", "machine learning", "neural network", "ai"],
+    "database": ["db", "sql", "nosql", "postgres", "mongodb", "mysql", "database"],
+    "web": ["website", "webapp", "http", "html", "css", "javascript", "web"],
+    "mobile": ["android", "ios", "react-native", "flutter", "mobile"],
+    "devops": ["ci", "cd", "docker", "kubernetes", "deployment", "devops"],
+    "testing": ["test", "unittest", "integration", "qa", "testing"]
+  },
+  "typoTolerance": {
+    "enabled": true,
+    "minWordSizeForTypos": {
+      "oneTypo": 4,
+      "twoTypos": 8
+    }
+  },
+  "pagination": {
+    "maxTotalHits": 10000
+  }
+}

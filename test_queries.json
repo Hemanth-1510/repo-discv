@@ -1,0 +1,154 @@
+[
+    {
+        "name": "Python web frameworks",
+        "query": "python web framework",
+        "expected": "Should return Flask, Django, FastAPI",
+        "filters": {
+            "language": [
+                "Python"
+            ],
+            "min_stars": 1000
+        }
+    },
+    {
+        "name": "Broad query - backend",
+        "query": "backend",
+        "expected": "Should match backend, server, api via synonyms",
+        "filters": {
+            "min_stars": 5000
+        }
+    },
+    {
+        "name": "Broad query - security",
+        "query": "security",
+        "expected": "Should expand to auth, encryption, vulnerability",
+        "filters": {
+            "is_active": true
+        }
+    },
+    {
+        "name": "Specific query - Rust web framework",
+        "query": "rust web framework",
+        "filters": {
+            "language": [
+                "Rust"
+            ]
+        },
+        "expected": "Should return actix-web, rocket, warp"
+    },
+    {
+        "name": "Typo tolerance test",
+        "query": "tensrflow",
+        "expected": "Should match TensorFlow despite typo",
+        "filters": {
+            "language": [
+                "Python",
+                "C++"
+            ]
+        }
+    },
+    {
+        "name": "Machine learning libraries",
+        "query": "machine learning",
+        "filters": {
+            "language": [
+                "Python"
+            ],
+            "min_stars": 10000
+        },
+        "expected": "PyTorch, TensorFlow, scikit-learn"
+    },
+    {
+        "name": "Active JavaScript frameworks",
+        "query": "javascript framework",
+        "filters": {
+            "language": [
+                "JavaScript",
+                "TypeScript"
+            ],
+            "is_active": true,
+            "min_stars": 20000
+        }
+    },
+    {
+        "name": "Go microservices",
+        "query": "microservice",
+        "filters": {
+            "language": [
+                "Go"
+            ],
+            "min_stars": 5000
+        }
+    },
+    {
+        "name": "By topics - docker",
+        "query": "docker",
+        "filters": {
+            "min_stars": 10000,
+            "not_archived": true
+        }
+    },
+    {
+        "name": "Empty query - top ranked",
+        "query": "",
+        "sort_by": "custom_rank",
+        "per_page": 10,
+        "expected": "Top 10 repositories by custom ranking"
+    },
+    {
+        "name": "Database systems",
+        "query": "database",
+        "filters": {
+            "language": [
+                "C",
+                "C++",
+                "Go",
+                "Rust"
+            ],
+            "min_stars": 10000
+        }
+    },
+    {
+        "name": "Mobile development",
+        "query": "mobile",
+        "filters": {
+            "not_archived": true,
+            "is_active": true
+        }
+    },
+    {
+        "name": "Recently updated Python projects",
+        "query": "python",
+        "filters": {
+            "language": [
+                "Python"
+            ],
+            "is_active": true,
+            "min_stars": 5000
+        },
+        "sort_by": "pushedAt",
+        "sort_order": "desc"
+    },
+    {
+        "name": "Filter by license",
+        "query": "web",
+        "filters": {
+            "license": [
+                "MIT",
+                "Apache-2.0"
+            ],
+            "min_stars": 10000
+        }
+    },
+    {
+        "name": "Organization repositories",
+        "query": "",
+        "filters": {
+            "owner_type": [
+                "Organization"
+            ],
+            "min_stars": 50000
+        },
+        "sort_by": "stargazerCount"
+    }
+]

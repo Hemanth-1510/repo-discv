@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Discovery - AI-Powered Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(148, 163, 184, 0.1);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-darker);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #ec4899 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            font-size: 0.875rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-light);
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.25rem;
+        }
+
+        /* Filters */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-select,
+        .filter-input {
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Results Stats */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        .results-count {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .results-count strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Repository Cards */
+        .results-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .repo-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .repo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .repo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .repo-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .repo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .repo-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .repo-name:hover {
+            color: var(--primary);
+        }
+
+        .repo-stats {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            color: var(--warning);
+        }
+
+        .repo-description {
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+            font-size: 0.875rem;
+        }
+
+        .repo-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-language {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .topic {
+            padding: 0.25rem 0.75rem;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .topic:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Ranking Explanation */
+        .ranking-explanation {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-left: 2px solid var(--primary);
+            border-radius: 8px;
+        }
+
+        .ranking-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .ranking-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .factor {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .factor-icon {
+            color: var(--success);
+            font-size: 1rem;
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 100px;
+        }
+
+        .score-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: var(--gradient-3);
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .score-value {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .search-section {
+                padding: 1.5rem;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .repo-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .repo-stats {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Repository Discovery</h1>
+            <p class="subtitle">Search 10,858+ GitHub projects with explainable AI ranking</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Search for repositories... (e.g., 'python web framework', 'machine learning', 'react')"
+                    autocomplete="off">
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Language</label>
+                    <select class="filter-select" id="languageFilter">
+                        <option value="">All Languages</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Python">Python</option>
+                        <option value="Java">Java</option>
+                        <option value="TypeScript">TypeScript</option>
+                        <option value="C++">C++</option>
+                        <option value="Go">Go</option>
+                        <option value="Rust">Rust</option>
+                        <option value="PHP">PHP</option>
+                        <option value="Ruby">Ruby</option>
+                        <option value="C#">C#</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Min Stars</label>
+                    <input type="number" class="filter-input" id="minStars" placeholder="e.g., 1000" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Activity</label>
+                    <select class="filter-select" id="activityFilter">
+                        <option value="">All Repos</option>
+                        <option value="active">Active (Updated < 2 years)</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="custom_rank">Best Match</option>
+                        <option value="stargazerCount">Most Stars</option>
+                        <option value="pushedAt">Recently Updated</option>
+                        <option value="createdAt">Newest</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-header">
+            <div class="results-count" id="resultsCount">
+                Enter a search query to find repositories
+            </div>
+            <div id="loadingIndicator" style="display: none;">
+                <div class="loading"></div>
+            </div>
+        </div>
+
+        <div class="results-grid" id="resultsGrid">
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-title">Start Searching</div>
+                <p>Try searching for "python", "web framework", or "machine learning"</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/search';
+        let searchTimeout;
+
+        const elements = {
+            searchInput: document.getElementById('searchInput'),
+            languageFilter: document.getElementById('languageFilter'),
+            minStars: document.getElementById('minStars'),
+            activityFilter: document.getElementById('activityFilter'),
+            sortFilter: document.getElementById('sortFilter'),
+            resultsGrid: document.getElementById('resultsGrid'),
+            resultsCount: document.getElementById('resultsCount'),
+            loadingIndicator: document.getElementById('loadingIndicator')
+        };
+
+        // Debounced search
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(), 400);
+        }
+
+        // Perform search
+        async function performSearch() {
+            const query = elements.searchInput.value.trim();
+            const language = elements.languageFilter.value;
+            const minStars = elements.minStars.value;
+            const activity = elements.activityFilter.value;
+            const sortBy = elements.sortFilter.value;
+
+            // Build request
+            const requestBody = {
+                query: query,
+                per_page: 20,
+                sort_by: sortBy,
+                sort_order: 'desc',
+                filters: {}
+            };
+
+            if (language) {
+                requestBody.filters.language = [language];
+            }
+
+            if (minStars) {
+                requestBody.filters.min_stars = parseInt(minStars);
+            }
+
+            if (activity === 'active') {
+                requestBody.filters.is_active = true;
+            } else if (activity === 'inactive') {
+                requestBody.filters.is_active = false;
+            }
+
+            // Show loading
+            elements.loadingIndicator.style.display = 'block';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error('Search failed');
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Search error:', error);
+                showError('Failed to search. Make sure the API is running on http://localhost:8000');
+            } finally {
+                elements.loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Display results
+        function displayResults(data) {
+            const { results, total, processing_time_ms } = data;
+
+            // Update count
+            elements.resultsCount.innerHTML = total > 0
+                ? `Found <strong>${total.toLocaleString()}</strong> repositories in <strong>${processing_time_ms}ms</strong>`
+                : 'No results found';
+
+            // Clear grid
+            elements.resultsGrid.innerHTML = '';
+
+            if (results.length === 0) {
+                elements.resultsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">😔</div>
+                        <div class="empty-title">No Results</div>
+                        <p>Try adjusting your search query or filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render cards
+            results.forEach((repo, index) => {
+                const card = createRepoCard(repo, index);
+                elements.resultsGrid.appendChild(card);
+            });
+        }
+
+        // Create repository card
+        function createRepoCard(repo, index) {
+            const card = document.createElement('div');
+            card.className = 'repo-card';
+            card.style.animationDelay = `${index * 0.05}s`;
+
+            const explanation = repo.relevance_explanation;
+            const topics = repo.topics.slice(0, 5);
+
+            card.innerHTML = `
+                <div class="repo-header">
+                    <a href="${repo.url}" target="_blank" class="repo-name">
+                        ${escapeHtml(repo.nameWithOwner)}
+                        <span style="font-size: 0.8em; opacity: 0.6;">↗</span>
+                    </a>
+                    <div class="repo-stats">
+                        <div class="stat">
+                            <span class="stat-icon">⭐</span>
+                            <span>${repo.stargazerCount.toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="repo-description">${escapeHtml(repo.description || 'No description provided')}</p>
+
+                <div class="repo-meta">
+                    ${repo.primaryLanguage ? `<span class="badge badge-language">${escapeHtml(repo.primaryLanguage)}</span>` : ''}
+                    ${repo.is_active ? '<span class="badge badge-active">✓ Active</span>' : ''}
+                </div>
+
+                ${topics.length > 0 ? `
+                    <div class="topics">
+                        ${topics.map(topic => `<span class="topic">${escapeHtml(topic)}</span>`).join('')}
+                    </div>
+                ` : ''}
+
+                <div class="ranking-explanation">
+                    <div class="ranking-title">📊 Ranking Explanation</div>
+                    <div class="ranking-factors">
+                        ${explanation.ranking_factors.slice(0, 3).map(factor => `
+                            <div class="factor">
+                                <span class="factor-icon">✓</span>
+                                <span>${escapeHtml(factor)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="score-bar">
+                        <span class="score-label">Overall Score</span>
+                        <div class="score-track">
+                            <div class="score-fill" style="width: ${explanation.final_score}%"></div>
+                        </div>
+                        <span class="score-value">${explanation.final_score.toFixed(1)}</span>
+                    </div>
+                    <div class="score-bar">
+                        <span class="score-label">Stars Impact</span>
+                        <div class="score-track">
+                            <div class="score-fill" style="width: ${explanation.stars_score}%"></div>
+                        </div>
+                        <span class="score-value">${explanation.stars_score.toFixed(1)}</span>
+                    </div>
+                    <div class="score-bar">
+                        <span class="score-label">Recency</span>
+                        <div class="score-track">
+                            <div class="score-fill" style="width: ${explanation.recency_score}%"></div>
+                        </div>
+                        <span class="score-value">${explanation.recency_score.toFixed(1)}</span>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Show error
+        function showError(message) {
+            elements.resultsGrid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <div class="empty-title">Error</div>
+                    <p>${escapeHtml(message)}</p>
+                </div>
+            `;
+        }
+
+        // Event listeners
+        elements.searchInput.addEventListener('input', handleSearch);
+        elements.languageFilter.addEventListener('change', handleSearch);
+        elements.minStars.addEventListener('input', handleSearch);
+        elements.activityFilter.addEventListener('change', handleSearch);
+        elements.sortFilter.addEventListener('change', handleSearch);
+
+        // Initial load with empty query (top ranked)
+        setTimeout(() => performSearch(), 100);
+    </script>
+</body>
+
+</html>
