@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Repository Search
 
 Search through 10,858 GitHub repositories using Meilisearch. No AI, no paid APIs.
@@ -176,3 +177,8 @@ docker-compose down
 ## That's It
 
 Search works. UI works. API works. No dependencies beyond what's in `requirements.txt`.
+=======
+# Demos
+
+1. Resume matching: https://github.com/deepklarity/demos/tree/resume-matching
+>>>>>>> 0ccffb3b16ef9b91b273775798109e6cd131712f
