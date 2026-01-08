@@ -12,7 +12,7 @@ venv/
 env/
 
 # Meilisearch data
-meili_data/
+# meili_data/  # Uncommented to commit pre-built index
 
 # IDE
 .vscode/
