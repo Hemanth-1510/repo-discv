@@ -449,10 +449,51 @@
             margin-top: 0.75rem;
         }
 
-        .score-label {
-            font-size: 0.75rem;
+        .results-count {
+            font-size: 0.875rem;
             color: var(--text-muted);
-            min-width: 100px;
+            margin-bottom: 1rem;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1.25rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            font-weight: 600;
         }
 
         .score-track {
@@ -587,78 +628,144 @@
             </div>
         </div>
 
-        <div class="results-header">
-            <div class="results-count" id="resultsCount">
+        <!-- Results Section -->
+        <div class="results-section">
+            <div id="resultsCount" class="results-count">
                 Enter a search query to find repositories
             </div>
-            <div id="loadingIndicator" style="display: none;">
-                <div class="loading"></div>
-            </div>
-        </div>
 
-        <div class="results-grid" id="resultsGrid">
-            <div class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <div class="empty-title">Start Searching</div>
-                <p>Try searching for "python", "web framework", or "machine learning"</p>
+            <!-- Pagination Controls -->
+            <div id="pagination" class="pagination" style="display: none;">
+                <button id="prev-btn" class="pagination-btn" onclick="previousPage()">
+                    ← Previous
+                </button>
+                <span id="page-info" class="page-info"></span>
+                <button id="next-btn" class="pagination-btn" onclick="nextPage()">
+                    Next →
+                </button>
+            </div>
+
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                Searching...
+            </div>
+            <div id="resultsGrid" class="results-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">Start Searching</div>
+                    <p>Try searching for "python", "web framework", or "machine learning"</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000/search';
+        const API_URL = '/search';  // Relative URL for HF Spaces
         let searchTimeout;
 
+        // State management
+        let currentPage = 1;
+        let totalResults = 0;
+        let totalPages = 0;
+        const resultsPerPage = 20;
+
+        // Cache DOM elements
         const elements = {
-            searchInput: document.getElementById('searchInput'),
+            searchInput: document.getElementById('searchInput'), // Kept original ID
             languageFilter: document.getElementById('languageFilter'),
             minStars: document.getElementById('minStars'),
             activityFilter: document.getElementById('activityFilter'),
             sortFilter: document.getElementById('sortFilter'),
-            resultsGrid: document.getElementById('resultsGrid'),
-            resultsCount: document.getElementById('resultsCount'),
-            loadingIndicator: document.getElementById('loadingIndicator')
+            resultsGrid: document.getElementById('resultsGrid'), // Kept original ID
+            resultsCount: document.getElementById('resultsCount'), // Kept original ID
+            loadingIndicator: document.getElementById('loadingIndicator'), // Kept original ID
+            pagination: document.getElementById('pagination'),
+            pageInfo: document.getElementById('page-info'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn')
         };
+
+        // Pagination functions
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                performSearch();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                performSearch();
+            }
+        }
+
+        function updatePaginationControls() {
+            if (totalResults > resultsPerPage) {
+                elements.pagination.style.display = 'flex';
+                elements.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                elements.prevBtn.disabled = currentPage === 1;
+                elements.nextBtn.disabled = currentPage === totalPages;
+            } else {
+                elements.pagination.style.display = 'none';
+            }
+        }
 
         // Debounced search
         function handleSearch() {
             clearTimeout(searchTimeout);
+            currentPage = 1;  // Reset to page 1 on new search
             searchTimeout = setTimeout(() => performSearch(), 400);
         }
 
         // Perform search
         async function performSearch() {
             const query = elements.searchInput.value.trim();
-            const language = elements.languageFilter.value;
-            const minStars = elements.minStars.value;
-            const activity = elements.activityFilter.value;
-            const sortBy = elements.sortFilter.value;
 
-            // Build request
+            // Show loading
+            elements.loadingIndicator.style.display = 'block';
+            elements.resultsGrid.innerHTML = '';
+
+            // Build request body
             const requestBody = {
-                query: query,
-                per_page: 20,
-                sort_by: sortBy,
-                sort_order: 'desc',
-                filters: {}
+                query: query || '',
+                page: currentPage,
+                per_page: resultsPerPage,
+                filters: {},
+                sort_by: elements.sortFilter.value, // Changed to use elements.sortFilter
+                sort_order: 'desc'
             };
 
-            if (language) {
+            // Add filters
+            const language = elements.languageFilter.value; // Changed to use elements.languageFilter
+            if (language !== '') { // Changed 'all' to '' based on existing options
                 requestBody.filters.language = [language];
             }
 
+            const minStars = elements.minStars.value; // Changed to use elements.minStars
             if (minStars) {
                 requestBody.filters.min_stars = parseInt(minStars);
             }
 
-            if (activity === 'active') {
-                requestBody.filters.is_active = true;
-            } else if (activity === 'inactive') {
-                requestBody.filters.is_active = false;
+            const activity = elements.activityFilter.value; // Changed to use elements.activityFilter
+            if (activity !== '') { // Changed 'all' to '' based on existing options
+                // The original code had 'active' and 'inactive' for activity.
+                // The new instruction implies '30d', '90d', '1y'.
+                // I will adapt the new logic to the existing filter values.
+                if (activity === 'active') {
+                    // Assuming 'active' means updated within the last 2 years, as per option text
+                    const now = new Date();
+                    const twoYearsAgo = new Date(now.setFullYear(now.getFullYear() - 2));
+                    requestBody.filters.min_last_updated = twoYearsAgo.toISOString().split('T')[0];
+                } else if (activity === 'inactive') {
+                    // Assuming 'inactive' means not updated within the last 2 years
+                    const now = new Date();
+                    const twoYearsAgo = new Date(now.setFullYear(now.getFullYear() - 2));
+                    requestBody.filters.max_last_updated = twoYearsAgo.toISOString().split('T')[0];
+                }
+                // If the user intended to add '30d', '90d', '1y' options, they would need to update the HTML select options first.
+                // For now, I'll stick to the existing 'active'/'inactive' logic but use the new date filtering approach.
             }
-
-            // Show loading
-            elements.loadingIndicator.style.display = 'block';
 
             try {
                 const response = await fetch(API_URL, {
@@ -670,7 +777,13 @@
                 if (!response.ok) throw new Error('Search failed');
 
                 const data = await response.json();
+
+                // Update pagination state
+                totalResults = data.total;
+                totalPages = data.total_pages || Math.ceil(totalResults / resultsPerPage);
+
                 displayResults(data);
+                updatePaginationControls();
             } catch (error) {
                 console.error('Search error:', error);
                 showError('Failed to search. Make sure the API is running on http://localhost:8000');
